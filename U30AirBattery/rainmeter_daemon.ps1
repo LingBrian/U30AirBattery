@@ -40,6 +40,9 @@ function Get-Line {
         $req = [System.Net.WebRequest]::Create($url)
         $req.Method  = 'GET'
         $req.Timeout = $TimeoutSec * 1000
+        # FIX v11.2：WebRequest.Timeout 只覆盖建连与响应头，ReadToEnd() 没有内建超时，
+        # 网络中断/设备半开时本进程会永久卡死 -> live.txt 停止更新；补读写超时，超时即走离线分支。
+        $req.ReadWriteTimeout = $TimeoutSec * 1000
         $req.Proxy   = $null                    # 局域网设备不走系统代理
         $req.Referer = "$Device/"               # 关键头：唯一的“鉴权”
         $resp = $null; $sr = $null
